@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  # The GitHub-hosted runner image ships a complete Android SDK; the
+  # android-actions/setup-android action currently fails while running
+  # "sdkmanager tools", so the SDK is used directly instead.
+  ANDROID_HOME: /usr/local/lib/android/sdk
+  ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install required SDK packages
+        run: |
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n1)"
+          fi
+          echo "using $SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
+          # compileSdk 37 is provided by the versioned package "platforms;android-37.0".
+          for pkg in "platform-tools" "platforms;android-37.0" "platforms;android-36" \
+                     "build-tools;37.0.0" "build-tools;36.0.0"; do
+            yes | "$SDKMANAGER" "$pkg" > /dev/null 2>&1 || echo "skipped: $pkg"
+          done
+          "$SDKMANAGER" --list_installed || true
+
+      - name: Build release APK
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace
+
+      - name: Collect APK
+        run: |
+          mkdir -p artifacts
+          VERSION="${GITHUB_REF_NAME:-dev}"
+          cp app/build/outputs/apk/release/app-release.apk "artifacts/samsung-tv-remote-${VERSION}.apk"
+          ls -l artifacts
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.apk
+          generate_release_notes: true
+          name: samsung-tv-remote ${{ github.ref_name }}
+          body: |
+            Podpisany APK aplikacji **Samsung TV Remote** — pilot do telewizora
+            Samsung przez usługę `samsung-tv-remote` (FastAPI, port 9039).
+
+            Zawartość wydania:
+            * ekran pilota (D-pad + OK, power, source, głośność, P+/P-, kanał,
+              media, aplikacje po App ID, parowanie, ustawienia połączenia),
+            * 3 widgety na ekran startowy: pełny pilot, sam power,
+              power + source + OK.
+
+            Instalacja: pobierz plik `samsung-tv-remote-${{ github.ref_name }}.apk`
+            i zainstaluj go na telefonie (konieczne zezwolenie na instalację
+            z nieznanych źródeł).
+
+      - name: Upload APK as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: samsung-tv-remote-apk
+          path: artifacts/*.apk

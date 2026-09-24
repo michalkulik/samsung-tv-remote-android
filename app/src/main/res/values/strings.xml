@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Samsung TV Remote</string>
+
+    <string name="status_online">TV połączony</string>
+    <string name="status_offline">TV niedostępny</string>
+    <string name="status_checking">Łączenie…</string>
+
+    <string name="section_power">Zasilanie</string>
+    <string name="section_nav">Nawigacja</string>
+    <string name="section_volume">Głośność</string>
+    <string name="section_channels">Kanały</string>
+    <string name="section_media">Media</string>
+    <string name="section_apps">Aplikacje</string>
+    <string name="section_settings">Ustawienia połączenia</string>
+
+    <string name="action_power">Power</string>
+    <string name="action_power_on">Włącz (WoL)</string>
+    <string name="action_power_off">Wyłącz</string>
+    <string name="action_source">Źródło</string>
+    <string name="action_home">Home</string>
+    <string name="action_back">Cofnij</string>
+    <string name="action_exit">Exit</string>
+    <string name="action_menu">Menu</string>
+    <string name="action_guide">Guide</string>
+    <string name="action_info">Info</string>
+    <string name="action_tools">Tools</string>
+    <string name="action_ok">OK</string>
+    <string name="action_mute">Wycisz</string>
+    <string name="action_channel_list">Lista kanałów</string>
+    <string name="action_go_channel">Idź</string>
+    <string name="action_channel_hint">Numer kanału</string>
+    <string name="action_run_app">Uruchom</string>
+    <string name="action_app_id_hint">App ID, np. 111299001912</string>
+    <string name="action_pair">Paruj z TV</string>
+    <string name="action_save">Zapisz</string>
+
+    <string name="settings_host">Adres usługi (host:port)</string>
+    <string name="settings_host_hint">192.168.68.19:9039</string>
+    <string name="settings_token">Token API (opcjonalnie)</string>
+    <string name="settings_token_hint">X-Api-Token, puste = brak</string>
+    <string name="settings_saved">Zapisano ustawienia</string>
+
+    <string name="widget_full_name">TV Pilot (pełny)</string>
+    <string name="widget_full_desc">D-pad, OK, cofnij, home, głośność, kanały, power, source</string>
+    <string name="widget_power_name">TV Power</string>
+    <string name="widget_power_desc">Tylko przycisk zasilania</string>
+    <string name="widget_compact_name">TV Power+Source+OK</string>
+    <string name="widget_compact_desc">Power, source i OK</string>
+</resources>
