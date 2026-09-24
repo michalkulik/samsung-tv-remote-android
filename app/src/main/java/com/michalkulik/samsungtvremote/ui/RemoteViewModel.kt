@@ -34,6 +34,21 @@ class RemoteViewModel(app: Application) : AndroidViewModel(app) {
 
     private var pollJob: Job? = null
 
+    // Debounce przyciskow: TV potrafi zdublowac klawisz, gdy dwa requesty
+    // przyjda pod rzad (np. podwojne tapniecie, drgniecie palca). Ten sam
+    // przycisk ignorujemy przez 600 ms od poprzedniego tapniecia.
+    private val lastTapAt = mutableMapOf<String, Long>()
+    private val tapGuardMs = 600L
+
+    /** Tapniecie przepuszczone przez debounce; false = zignorowane jako dublet. */
+    private fun tapAllowed(busyId: String): Boolean {
+        val now = android.os.SystemClock.uptimeMillis()
+        val last = lastTapAt[busyId] ?: 0L
+        if (now - last < tapGuardMs) return false
+        lastTapAt[busyId] = now
+        return true
+    }
+
     init {
         viewModelScope.launch {
             settings.baseUrlFlow().collect { url ->
@@ -69,6 +84,8 @@ class RemoteViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Wysyła komendę; `busyId` pokazuje spinner na przycisku do końca wywołania. */
     fun send(cmd: RemoteCommand, busyId: String, refreshAfter: Boolean = true) {
+        if (!tapAllowed(busyId)) return
+        if (_ui.value.busy != null) return // poprzednia komenda jeszcze leci — nie kolejkuj
         viewModelScope.launch {
             _ui.value = _ui.value.copy(busy = busyId, message = null)
             val result = api.send(cmd)
